@@ -2,49 +2,53 @@
 
 #include "pch.h"
 #include "Common\DeviceResources.h"
-#include "Creating_a_WindowMain.h"
+#include <iostream>
 
-namespace Creating_a_Window
-{
-	// Main entry point for our app. Connects the app with the Windows shell and handles application lifecycle events.
-	ref class App sealed : public Windows::ApplicationModel::Core::IFrameworkView
-	{
-	public:
-		App();
+using namespace Windows::ApplicationModel;
+using namespace Windows::ApplicationModel::Core;
+using namespace Windows::ApplicationModel::Activation;
+using namespace Windows::UI::Core;
+using namespace Windows::UI::Popups;
+using namespace Windows::System;
+using namespace Windows::Foundation;
+using namespace Windows::Graphics::Display;
+using namespace Platform;
 
-		// IFrameworkView Methods.
-		virtual void Initialize(Windows::ApplicationModel::Core::CoreApplicationView^ applicationView);
-		virtual void SetWindow(Windows::UI::Core::CoreWindow^ window);
-		virtual void Load(Platform::String^ entryPoint);
-		virtual void Run();
-		virtual void Uninitialize();
-
-	protected:
-		// Application lifecycle event handlers.
-		void OnActivated(Windows::ApplicationModel::Core::CoreApplicationView^ applicationView, Windows::ApplicationModel::Activation::IActivatedEventArgs^ args);
-		void OnSuspending(Platform::Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ args);
-		void OnResuming(Platform::Object^ sender, Platform::Object^ args);
-
-		// Window event handlers.
-		void OnWindowSizeChanged(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::WindowSizeChangedEventArgs^ args);
-		void OnVisibilityChanged(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::VisibilityChangedEventArgs^ args);
-		void OnWindowClosed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::CoreWindowEventArgs^ args);
-
-		// DisplayInformation event handlers.
-		void OnDpiChanged(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args);
-		void OnOrientationChanged(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args);
-		void OnDisplayContentsInvalidated(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args);
-
-	private:
-		std::shared_ptr<DX::DeviceResources> m_deviceResources;
-		std::unique_ptr<Creating_a_WindowMain> m_main;
-		bool m_windowClosed;
-		bool m_windowVisible;
-	};
-}
-
-ref class Direct3DApplicationSource sealed : Windows::ApplicationModel::Core::IFrameworkViewSource
-{
+//ref classes
+/*
+Cannot use public variables, must use properties instad and then utilise setters/getters to access them
+Cannot use public constructors, unless the sealed keyword is also used
+*/
+//sealed keyword
+/*
+Sealed allows a ref class to have a public constructor
+A sealed class cannot be inherited by another class
+*/
+//App Class
+/*
+The app class is a gateway for all things Windows
+Windows uses this class as a event handler, any events that happen (such as closing the window or resizing) will be told to us through this class
+*/
+ref class App sealed : public IFrameworkView {
 public:
-	virtual Windows::ApplicationModel::Core::IFrameworkView^ CreateView();
+	//All these methods are called by IFrameworkView from behind the scenes
+	virtual void Initialize(CoreApplicationView^ AppView); //Gives us access to low level properties and notifications
+	virtual void SetWindow(CoreWindow^ Window); //Allows us to setup window notifications such as key strokes and mouse movements
+	virtual void Load(String^ EntryPoint); //Allows us to load in graphics, sound effects, and allocate memory
+	virtual void Run(); //This is where the game loop is
+	virtual void Uninitialize(); //Cleans up any allocated memory created during the Load method
+
+	void OnActivated(CoreApplicationView^ CoreAppView, IActivatedEventArgs^ Args);
 };
+
+//IFrameworkViewSource
+/*
+IFrameworkViewSource is a simple WinRT interface class
+The job of this class is to set up our application with windows and to prepare a second class IFrameworkView
+*/
+ref class AppSource sealed : IFrameworkViewSource {
+public:
+	//This method is called behind the scenes by IFrameworkViewSource for us
+	virtual IFrameworkView^ CreateView(); //Creates and returns a ref new instance of the App class (which inherits from the IFrameworkView class)
+};
+
