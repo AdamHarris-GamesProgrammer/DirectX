@@ -39,6 +39,15 @@ public:
 	virtual void Uninitialize(); //Cleans up any allocated memory created during the Load method
 
 	void OnActivated(CoreApplicationView^ CoreAppView, IActivatedEventArgs^ Args);
+
+	//Event handler for mouse clicking
+	void PointerPressed(CoreWindow^ Window, PointerEventArgs^ Args);
+	void PointerMoved(CoreWindow^ Window, PointerEventArgs^ Args);
+	void PointerRelease(CoreWindow^ Window, PointerEventArgs^ Args);
+	void PointerWheelChanged(CoreWindow^ Window, PointerEventArgs^ Args);
+
+	void KeyDown(CoreWindow^ Window, KeyEventArgs^ Args);
+	void KeyUp(CoreWindow^ Window, KeyEventArgs^ Args);
 };
 
 //IFrameworkViewSource

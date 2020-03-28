@@ -21,7 +21,7 @@ void App::Initialize(CoreApplicationView^ AppView)
 	AppView->Activated+= : The activated member is an event, which is a member of a class that provides it a pointer to a function the "+=" operator is used as it adds a function to the event
 	ref new TypedEventHandler : a TypedEventHandler is a generic class that processes events
 	<CoreApplicationView^, IActivatedEventArgs^> : As TypedEventHandler is a generic class is does not know what type of parameters will be passed to it so we have to say what the types are, these will match the OnActivated method parameters
-	(this, &App::OnActivated); : The TypedEventHandler takes two parameters. It needs to know who will be calling the function and what function to call. 
+	(this, &App::OnActivated); : The TypedEventHandler takes two parameters. It needs to know who will be calling the function and what function to call.
 		App is calling the function so we pass in this and App::OnActivated is the function that needs to be called so we pass in that
 	*/
 	AppView->Activated += ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &App::OnActivated); //Points to the OnActivated function to create and activate the window
@@ -29,7 +29,14 @@ void App::Initialize(CoreApplicationView^ AppView)
 
 void App::SetWindow(CoreWindow^ Window)
 {
+	//Informs Windows of the pointer pressed event handler
+	Window->PointerPressed += ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &App::PointerPressed);
+	Window->PointerReleased += ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &App::PointerRelease);
+	Window->PointerMoved += ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &App::PointerMoved);
+	Window->PointerWheelChanged += ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &App::PointerWheelChanged);
 
+	Window->KeyDown += ref new TypedEventHandler<CoreWindow^, KeyEventArgs^>(this, &App::KeyDown);
+	Window->KeyUp += ref new TypedEventHandler<CoreWindow^, KeyEventArgs^>(this, &App::KeyUp);
 }
 
 void App::Load(String^ EntryPoint)
@@ -39,6 +46,23 @@ void App::Load(String^ EntryPoint)
 
 void App::Run()
 {
+	//Obtain a pointer to the window
+	CoreWindow^ Window = CoreWindow::GetForCurrentThread();
+
+	//ProcessEvents()
+	/*
+	Dispatches Events
+	Takes one of four values
+	ProcessOneIfPresent : Dispatch the next event waiting in the queue (if applicable)
+	ProcessAllIfPresent : Dispatch the next event waiting in the queue and repeat until all waiting events are handled
+	ProcessOneAndAllPending : Dispatch all waiting events. if none are waiting wait until another one arrives
+	ProcessUntilQuit : Dispatch all events and then repeat, do not stop until windows shuts the program down
+	These options are part of the CoreProcessEventsOption enum
+
+	ProcessUntilQuit is used to put our program into a near infinite loop until the program is exited.
+	*/
+	Window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessUntilQuit);
+
 
 }
 
@@ -53,6 +77,54 @@ void App::OnActivated(CoreApplicationView^ CoreAppView, IActivatedEventArgs^ Arg
 	Window->Activate(); //Activates the window
 }
 
+//Takes two parameters, the first is a pointer to the current window, the second is the details of the event, in this case the mouse position, buttons pressed etc.
+void App::PointerPressed(CoreWindow^ Window, PointerEventArgs^ Args)
+{
+	//MessageDialog Dialog("Thank you for noticing me Senpai.", "UwU");
+	//Dialog.ShowAsync();
+}
+
+void App::PointerMoved(CoreWindow^ Window, PointerEventArgs^ Args)
+{
+	//Spawns a Dialog box when the pointer is moved
+	/*MessageDialog Dialog("Thank you for noticing me Senpai.", "UwU");
+	Dialog.ShowAsync();*/
+}
+
+void App::PointerRelease(CoreWindow^ Window, PointerEventArgs^ Args)
+{
+	//Spawns a Dialog Box when the pointer is released
+	//MessageDialog Dialog("Thank you for noticing me Senpai.", "UwU");
+	//Dialog.ShowAsync();
+}
+
+void App::PointerWheelChanged(CoreWindow^ Window, PointerEventArgs^ Args)
+{
+	int Wheel = Args->CurrentPoint->Properties->MouseWheelDelta;
+
+	MessageDialog Dialog(Wheel.ToString(), "Scroll Wheel");
+	Dialog.ShowAsync();
+}
+
+void App::KeyDown(CoreWindow^ Window, KeyEventArgs^ Args)
+{
+	//Dialog box pops up with the key that was pressed 
+	/*MessageDialog Dialog("That was: " + Args->VirtualKey.ToString(), "Key Pressed");
+	Dialog.ShowAsync();*/
+
+	//Quits the program when escape is pressed
+	if (Args->VirtualKey == VirtualKey::Escape) {
+		exit(0);
+	}
+}
+
+void App::KeyUp(CoreWindow^ Window, KeyEventArgs^ Args)
+{
+	if (Args->VirtualKey == VirtualKey::A) {
+		MessageDialog Dialog("You Let A Go!", "Let it Go!");
+		Dialog.ShowAsync();
+	}
+}
 
 //AppSource Class
 IFrameworkView^ AppSource::CreateView()
@@ -63,10 +135,10 @@ IFrameworkView^ AppSource::CreateView()
 
 //MTAThread = Multi-Threaded Apartment Thread
 /*
-Windows 10 requires DirectX to run in MTAThread mode 
+Windows 10 requires DirectX to run in MTAThread mode
 Using this before main() forces out program to using this mode
 */
-[MTAThread] 
+[MTAThread]
 
 //^ handle declarator - Automatically deletes memory when it is no longer needed, basically a smart pointer
 //Array<String^>^ args
