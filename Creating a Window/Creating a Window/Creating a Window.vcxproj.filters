@@ -72,6 +72,7 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="Constants.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\StoreLogo.png">

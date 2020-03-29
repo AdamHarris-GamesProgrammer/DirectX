@@ -82,6 +82,16 @@ void Game::Initialize()
 		&scd,									//Swap Chain Description
 		nullptr,								//allows us to restrict rendering to a specific monitor
 		&swapchain);							//pointer to the swap chain variable
+
+	ComPtr<ID3D11Texture2D> backbuffer;
+
+	//GetBuffer is a function that finds the back buffer we want to obtain and creates an interface that points to it
+	swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backbuffer); //Gets the address of the back buffer and saves the address in our backbuffer variable
+
+	//Create a render target
+	dev->CreateRenderTargetView(backbuffer.Get(), nullptr, &rendertarget);
+
+
 }
 
 void Game::Update()
@@ -91,6 +101,13 @@ void Game::Update()
 
 void Game::Render()
 {	
+	//Sets our render target object as the active render target
+	devcon->OMSetRenderTargets(1, rendertarget.GetAddressOf(), nullptr);
+
+	//clear the back buffer to a deep blue colour
+	float color[4] = { 0.0f,0.2f,0.4f,1.0f };
+	devcon->ClearRenderTargetView(rendertarget.Get(), color);
+
 	//Switches the back buffer and the front buffer
 	swapchain->Present(1, 0);
 }

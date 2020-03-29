@@ -16,6 +16,8 @@ public:
 	//The swap chain is a series of preprepared frames for the GPU basically double and triple buffering
 	ComPtr<IDXGISwapChain1> swapchain;		//Swap Chain Interface
 
+	//The render target is the buffer that needs to be written to
+	ComPtr<ID3D11RenderTargetView> rendertarget;
 
 	void Initialize();
 	void Update();
