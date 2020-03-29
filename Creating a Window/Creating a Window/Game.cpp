@@ -1,6 +1,30 @@
 #include "pch.h"
 #include "Game.h"
 
+//This function loads a shader file into a array
+Platform::Array<byte>^ LoadShaderFile(std::string File)
+{
+	Array<byte >^ FileData = nullptr;
+
+	// open the file
+	std::ifstream VertexFile(File, std::ios::in | std::ios::binary | std::ios::ate);
+
+	// if open was successful
+	if (VertexFile.is_open())
+	{
+		// find the length of the file
+		int Length = (int)VertexFile.tellg();
+
+		// collect the file data
+		FileData = ref new Array<byte>(Length);
+		VertexFile.seekg(0, std::ios::beg);
+		VertexFile.read(reinterpret_cast<char*>(FileData->Data), Length);
+		VertexFile.close();
+	}
+
+	return FileData;
+}
+
 void Game::Initialize()
 {
 	//Create temporary ComPtr to a device and device context
@@ -91,7 +115,18 @@ void Game::Initialize()
 	//Create a render target
 	dev->CreateRenderTargetView(backbuffer.Get(), nullptr, &rendertarget);
 
+	D3D11_VIEWPORT viewport = { 0 };
 
+	//Determines the width and height of the view port
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = Window->Bounds.Width;
+	viewport.Height = Window->Bounds.Height;
+
+	devcon->RSSetViewports(1, &viewport);
+
+	InitGraphics();
+	InitPipeline();
 }
 
 void Game::Update()
@@ -106,8 +141,62 @@ void Game::Render()
 
 	//clear the back buffer to a deep blue colour
 	float color[4] = { 0.0f,0.2f,0.4f,1.0f };
+	//Takes an address to the current rendertarget and then sets the background color
 	devcon->ClearRenderTargetView(rendertarget.Get(), color);
+
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+	devcon->IASetVertexBuffers(0, 1, vertexbuffer.GetAddressOf(), &stride, &offset);
+
+	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+
+	devcon->Draw(3, 0);
 
 	//Switches the back buffer and the front buffer
 	swapchain->Present(1, 0);
 }
+
+void Game::InitGraphics()
+{
+	Vertex OurVerticies[] = {
+		{0.0f,0.5f,0.0f},
+		{0.45f,-0.5f,0.0f},
+		{-0.45f,-0.5f,0.0f}
+	};
+
+	//Initialize everything to 0
+	D3D11_BUFFER_DESC bd = { 0 };
+	bd.ByteWidth = sizeof(Vertex) * ARRAYSIZE(OurVerticies);	//This is the size of each vertex in memory
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;					//This is the type of buffer that we want Direct3D to make
+
+	D3D11_SUBRESOURCE_DATA srd = { OurVerticies, 0, 0 };		//This is a struct containing a description of the data that we want to store in the vertex buffer
+
+	dev->CreateBuffer(&bd, &srd, &vertexbuffer);				//This creates the buffer, this takes a reference to the buffer description and the source data for the buffer and then we store the created buffer in the vertexbuffer passed in
+}
+
+void Game::InitPipeline()
+{
+	//Load shader information
+	Platform::Array<byte>^ VSFile = LoadShaderFile("VertexShader.cso");
+	Array<byte>^ PSFile = LoadShaderFile("PixelShader.cso");
+
+	//Creating the shader objects
+	dev->CreateVertexShader(VSFile->Data, VSFile->Length, nullptr, &vertexshader);
+	dev->CreatePixelShader(PSFile->Data, PSFile->Length, nullptr, &pixelshader);
+
+	//Setting these to be the active shaders
+	//SetShader() : Takes a address to the shader
+	devcon->VSSetShader(vertexshader.Get(), nullptr, 0);
+	devcon->PSSetShader(pixelshader.Get(), nullptr, 0);
+
+
+	//Creating the input layout
+	D3D11_INPUT_ELEMENT_DESC ied[] = {
+		{"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0,0,D3D11_INPUT_PER_VERTEX_DATA, 0}
+	};
+
+	dev->CreateInputLayout(ied, ARRAYSIZE(ied), VSFile->Data, VSFile->Length, &inputlayout);
+	devcon->IASetInputLayout(inputlayout.Get());
+}
+
+

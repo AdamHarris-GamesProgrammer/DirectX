@@ -73,6 +73,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Constants.h" />
+    <ClInclude Include="Structs.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\StoreLogo.png">
@@ -81,5 +82,9 @@
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="VertexShader.hlsl" />
+    <FxCompile Include="PixelShader.hlsl" />
   </ItemGroup>
 </Project>

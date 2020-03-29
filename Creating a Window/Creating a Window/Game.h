@@ -2,8 +2,15 @@
 #include <wrl/client.h>
 #include <DirectXColors.h>
 
+#include <iostream>
+#include <fstream>
+#include <string>
+
+#include "Structs.h"
+
 using namespace Microsoft::WRL;
 using namespace Windows::UI::Core;
+using namespace Platform;
 using namespace DirectX;
 
 class Game
@@ -19,8 +26,22 @@ public:
 	//The render target is the buffer that needs to be written to
 	ComPtr<ID3D11RenderTargetView> rendertarget;
 
+	//Vertex Buffer
+	ComPtr<ID3D11Buffer> vertexbuffer;
+
+	//Input layout
+	ComPtr<ID3D11InputLayout> inputlayout;
+
+	//Shader Variables
+	ComPtr<ID3D11VertexShader> vertexshader;
+	ComPtr<ID3D11PixelShader> pixelshader;
+
 	void Initialize();
 	void Update();
 	void Render();
+
+	void InitGraphics();
+	void InitPipeline();
+
 };
 
