@@ -6,6 +6,11 @@ void Game::Initialize()
 	//Create temporary ComPtr to a device and device context
 	/*
 	There is no Create Device function for Version 11.1 so we create Version 11 ComPtr and then convert them at a later point
+
+	ComPtr
+	COM : Component Object Model is a way of coding so that each script does not depend on another class to work, essentially each class is a lego brick, it dosent care what pieces are attached to it
+	It just works with whatever 
+	You create new COM objects using the ComPtr class this takes ina type which you wish to cast the ComPtr to.
 	*/
 	ComPtr<ID3D11Device> dev11;
 	ComPtr<ID3D11DeviceContext> devcon11;
@@ -44,6 +49,39 @@ void Game::Initialize()
 	*/
 	dev11.As(&dev);
 	devcon11.As(&devcon);
+
+	//Getting the swap chain
+	//First, convert a ID3D11Device1 into a IDXGIDevice1
+	ComPtr<IDXGIDevice1> dxgiDevice;
+	dev.As(&dxgiDevice);
+
+	//Second, use the IDXGIDevice1 interface to get access to the adapter
+	//IDXGIAdapter is a virtual representation of the video card, the parent of this object is the factory that was used to create our device
+	ComPtr<IDXGIAdapter> dxgiAdapter;
+	dxgiDevice->GetAdapter(&dxgiAdapter);
+
+	//Third, use the IDXGIAdapter interface to get access to the factory (Factory is a COM object that can be used to create other COM objects
+	//IDXGIFactory2 is a interface to our factory from this interface we can create the swap chain, the 2 at the end indicates this is the version 2 of the interface
+	ComPtr<IDXGIFactory2> dxgiFactory;
+	//GetParent() : This allows us to access the factory used for out adapter and the device, it has two parameters the type of interface we are obtaining and a pointer to store the address in
+	//__uuidof() : This is a COM function for the unique identifying code of a COM object, we use it here to tell GetParent what type of interface we are obtaining
+	dxgiAdapter->GetParent(__uuidof(IDXGIFactory2), &dxgiFactory);
+
+	DXGI_SWAP_CHAIN_DESC1 scd = { 0 };
+	scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;		//How the swap chain should be used
+	scd.BufferCount = 2;									//a front and back buffer (double buffering)
+	scd.Format = DXGI_FORMAT_B8G8R8A8_UNORM;				//Most common swap chain format
+	scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;		//Recommended flip mode
+	scd.SampleDesc.Count = 1;								//Disables Anti Aliasing
+
+	CoreWindow^ Window = CoreWindow::GetForCurrentThread();
+
+	dxgiFactory->CreateSwapChainForCoreWindow(
+		dev.Get(),								//Device
+		reinterpret_cast<IUnknown*>(Window),	//Windoq
+		&scd,									//Swap Chain Description
+		nullptr,								//allows us to restrict rendering to a specific monitor
+		&swapchain);							//pointer to the swap chain variable
 }
 
 void Game::Update()
@@ -52,6 +90,7 @@ void Game::Update()
 }
 
 void Game::Render()
-{
-
+{	
+	//Switches the back buffer and the front buffer
+	swapchain->Present(1, 0);
 }
