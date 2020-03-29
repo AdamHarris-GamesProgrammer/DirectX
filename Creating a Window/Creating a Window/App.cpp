@@ -30,7 +30,7 @@ void App::Initialize(CoreApplicationView^ AppView)
 	CoreApplication::Suspending += ref new EventHandler<SuspendingEventArgs^>(this, &App::Suspending);
 	CoreApplication::Resuming += ref new EventHandler<Object^>(this, &App::Resuming);
 
-	WindowClosed = false;
+	mWindowClosed = false;
 }
 
 void App::SetWindow(CoreWindow^ Window)
@@ -56,13 +56,11 @@ void App::Load(String^ EntryPoint)
 
 void App::Run()
 {
+	mGame.Initialize();
 	//Obtain a pointer to the window
 	CoreWindow^ Window = CoreWindow::GetForCurrentThread();
 
-
-
-
-	while (!WindowClosed) {
+	while (!mWindowClosed) {
 		//ProcessEvents()
 		/*
 		Dispatches Events
@@ -74,6 +72,9 @@ void App::Run()
 		These options are part of the CoreProcessEventsOption enum
 		*/
 		Window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
+
+		mGame.Update();
+		mGame.Render();
 	}
 
 }
@@ -126,7 +127,7 @@ void App::KeyDown(CoreWindow^ Window, KeyEventArgs^ Args)
 
 	//Quits the program when escape is pressed
 	if (Args->VirtualKey == VirtualKey::Escape) {
-		WindowClosed = true;
+		mWindowClosed = true;
 	}
 }
 
@@ -150,7 +151,7 @@ void App::Resuming(Object^ Sender, Object^ Args)
 
 void App::Closed(CoreWindow^ Sender, CoreWindowEventArgs^ Args)
 {
-	WindowClosed = true;
+	mWindowClosed = true;
 }
 
 //AppSource Class

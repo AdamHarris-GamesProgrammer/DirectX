@@ -66,10 +66,12 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="Game.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Game.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\StoreLogo.png">

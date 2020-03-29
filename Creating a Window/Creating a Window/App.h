@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "pch.h"
+#include "Game.h"
 #include "Common\DeviceResources.h"
 #include <iostream>
 
@@ -57,7 +58,8 @@ public:
 	void Closed(CoreWindow^ Sender, CoreWindowEventArgs^ Args);
 
 private:
-	bool WindowClosed;
+	bool mWindowClosed;
+	Game mGame;
 };
 
 //IFrameworkViewSource
