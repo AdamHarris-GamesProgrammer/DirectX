@@ -25,6 +25,12 @@ void App::Initialize(CoreApplicationView^ AppView)
 		App is calling the function so we pass in this and App::OnActivated is the function that needs to be called so we pass in that
 	*/
 	AppView->Activated += ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &App::OnActivated); //Points to the OnActivated function to create and activate the window
+
+	//Adds the suspending function as the handler for the windows suspend event
+	CoreApplication::Suspending += ref new EventHandler<SuspendingEventArgs^>(this, &App::Suspending);
+	CoreApplication::Resuming += ref new EventHandler<Object^>(this, &App::Resuming);
+
+	WindowClosed = false;
 }
 
 void App::SetWindow(CoreWindow^ Window)
@@ -35,8 +41,12 @@ void App::SetWindow(CoreWindow^ Window)
 	Window->PointerMoved += ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &App::PointerMoved);
 	Window->PointerWheelChanged += ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &App::PointerWheelChanged);
 
+	//Informs Windows of the key stroke event handlers
 	Window->KeyDown += ref new TypedEventHandler<CoreWindow^, KeyEventArgs^>(this, &App::KeyDown);
 	Window->KeyUp += ref new TypedEventHandler<CoreWindow^, KeyEventArgs^>(this, &App::KeyUp);
+
+	//Informs Windows of the Closed event handlers
+	Window->Closed += ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(this, &App::Closed);
 }
 
 void App::Load(String^ EntryPoint)
@@ -49,20 +59,22 @@ void App::Run()
 	//Obtain a pointer to the window
 	CoreWindow^ Window = CoreWindow::GetForCurrentThread();
 
-	//ProcessEvents()
-	/*
-	Dispatches Events
-	Takes one of four values
-	ProcessOneIfPresent : Dispatch the next event waiting in the queue (if applicable)
-	ProcessAllIfPresent : Dispatch the next event waiting in the queue and repeat until all waiting events are handled
-	ProcessOneAndAllPending : Dispatch all waiting events. if none are waiting wait until another one arrives
-	ProcessUntilQuit : Dispatch all events and then repeat, do not stop until windows shuts the program down
-	These options are part of the CoreProcessEventsOption enum
 
-	ProcessUntilQuit is used to put our program into a near infinite loop until the program is exited.
-	*/
-	Window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessUntilQuit);
 
+
+	while (!WindowClosed) {
+		//ProcessEvents()
+		/*
+		Dispatches Events
+		Takes one of four values
+		ProcessOneIfPresent : Dispatch the next event waiting in the queue (if applicable)
+		ProcessAllIfPresent : Dispatch the next event waiting in the queue and repeat until all waiting events are handled
+		ProcessOneAndAllPending : Dispatch all waiting events. if none are waiting wait until another one arrives
+		ProcessUntilQuit : Dispatch all events and then repeat, do not stop until windows shuts the program down
+		These options are part of the CoreProcessEventsOption enum
+		*/
+		Window->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
+	}
 
 }
 
@@ -114,7 +126,7 @@ void App::KeyDown(CoreWindow^ Window, KeyEventArgs^ Args)
 
 	//Quits the program when escape is pressed
 	if (Args->VirtualKey == VirtualKey::Escape) {
-		exit(0);
+		WindowClosed = true;
 	}
 }
 
@@ -124,6 +136,21 @@ void App::KeyUp(CoreWindow^ Window, KeyEventArgs^ Args)
 		MessageDialog Dialog("You Let A Go!", "Let it Go!");
 		Dialog.ShowAsync();
 	}
+}
+
+void App::Suspending(Object^ Sender, SuspendingEventArgs^ Args)
+{
+
+}
+
+void App::Resuming(Object^ Sender, Object^ Args)
+{
+
+}
+
+void App::Closed(CoreWindow^ Sender, CoreWindowEventArgs^ Args)
+{
+	WindowClosed = true;
 }
 
 //AppSource Class

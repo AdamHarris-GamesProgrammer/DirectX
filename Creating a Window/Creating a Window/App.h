@@ -46,8 +46,18 @@ public:
 	void PointerRelease(CoreWindow^ Window, PointerEventArgs^ Args);
 	void PointerWheelChanged(CoreWindow^ Window, PointerEventArgs^ Args);
 
+	//Event handlers for key up and down
 	void KeyDown(CoreWindow^ Window, KeyEventArgs^ Args);
 	void KeyUp(CoreWindow^ Window, KeyEventArgs^ Args);
+
+	//Event handler for suspending and resuming application
+	void Suspending(Object^ Sender, SuspendingEventArgs^ Args);
+	void Resuming(Object^ Sender, Object^ Args);
+
+	void Closed(CoreWindow^ Sender, CoreWindowEventArgs^ Args);
+
+private:
+	bool WindowClosed;
 };
 
 //IFrameworkViewSource
