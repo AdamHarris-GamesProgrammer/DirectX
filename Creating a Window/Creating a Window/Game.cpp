@@ -148,7 +148,7 @@ void Game::Render()
 	UINT offset = 0;
 	devcon->IASetVertexBuffers(0, 1, vertexbuffer.GetAddressOf(), &stride, &offset);
 
-	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	devcon->Draw(3, 0);
 
@@ -159,9 +159,9 @@ void Game::Render()
 void Game::InitGraphics()
 {
 	Vertex OurVerticies[] = {
-		{0.0f,0.5f,0.0f},
-		{0.45f,-0.5f,0.0f},
-		{-0.45f,-0.5f,0.0f}
+		{0.0f,0.5f,0.0f,	1.0f,0.0f,0.0f},
+		{0.45f,-0.5f,0.0f,	0.0f,1.0f,0.0f},
+		{-0.45f,-0.5f,0.0f,	0.0f,0.0f,1.0f},
 	};
 
 	//Initialize everything to 0
@@ -192,11 +192,10 @@ void Game::InitPipeline()
 
 	//Creating the input layout
 	D3D11_INPUT_ELEMENT_DESC ied[] = {
-		{"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0,0,D3D11_INPUT_PER_VERTEX_DATA, 0}
+		{"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0,0,D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"COLOR", 0, DXGI_FORMAT_R32G32_FLOAT, 0,12,D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
 
 	dev->CreateInputLayout(ied, ARRAYSIZE(ied), VSFile->Data, VSFile->Length, &inputlayout);
 	devcon->IASetInputLayout(inputlayout.Get());
 }
-
-
